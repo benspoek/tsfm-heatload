@@ -1,0 +1,20 @@
+{
+  "created_at_utc": "2026-06-02T13:16:41.245400+00:00",
+  "script": "prepare_flensburg_heat.py",
+  "source_path": "flensburg\\2020-2024 Stadtwerke Flensburg Heat Network Data Hourly.xlsx",
+  "output_path": "flensburg\\demand\\heat\\heat_dh.csv",
+  "timezone": "Europe/Berlin",
+  "source_heat_column": {
+    "station_id": "STWFL.0FH00W801",
+    "label": "HKW Waermeleistung Gesamt"
+  },
+  "ignored_columns": [
+    "STWFL.6FH00T030 / Vorlauftemperaturen FH Strang 600"
+  ],
+  "raw_rows": 43843,
+  "output_rows": 43848,
+  "inserted_and_interpolated_rows": 5,
+  "start": "2020-01-01T00:00:00+01:00",
+  "end": "2024-12-31T23:00:00+01:00",
+  "missing_heat_after_processing": 0
+}
