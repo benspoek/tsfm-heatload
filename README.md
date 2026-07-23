@@ -1,5 +1,7 @@
 # Heat Load Forecasting Experiment Code
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21511738.svg)](https://doi.org/10.5281/zenodo.21511738)
+
 This folder contains the shareable experiment code used for the TabPFN-TS, Chronos-2, AutoGluon, and Multi-Resolution Residual-Correction Forecaster evaluations.
 
 The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, data-scraper/preparation scripts, and unpublished Munich input data.
@@ -43,6 +45,11 @@ python -m pip install -r requirements.txt
 ```
 
 The experiment versions are pinned to `tabpfn-time-series==1.1.0`, `tabpfn==8.0.3`, `chronos-forecasting==2.2.2`, and `autogluon.timeseries==1.5.0`. TimesFM is not an environment dependency. Chronos-2 is run only through the dedicated Chronos scripts, while the AutoGluon benchmarks use AutoGluon's tabular, statistical, and optional neural models without custom Chronos-2 or TimesFM wrappers.
+
+## Citation
+
+The archived release is available from Zenodo:
+[doi:10.5281/zenodo.21511738](https://doi.org/10.5281/zenodo.21511738).
 
 ## License
 
