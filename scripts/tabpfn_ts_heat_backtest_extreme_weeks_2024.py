@@ -33,12 +33,11 @@ from tabpfn_ts_heat_forecast import (
     prediction_steps,
     validate_model_inputs,
 )
-from utils import TABPFN_PACKAGES, initialize_wandb, make_run_id, metadata_envelope, write_metadata
+from utils import TABPFN_PACKAGES, make_run_id, metadata_envelope, write_metadata
 
 
 DEFAULT_CONTEXT_HOURS = 365 * 24
 DEFAULT_EXPERIMENT_OUTPUT_DIR = BASE_OUTPUT_DIR / "experiments/extreme_weeks_2024"
-DEFAULT_WANDB_PROJECT = "timeseries-forecasting"
 DEFAULT_QUANTILES = [
     0.01,
     0.025,
@@ -98,15 +97,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_EXPERIMENT_OUTPUT_DIR)
     parser.add_argument("--run-id", default=None, help="Optional fixed run directory name.")
     parser.add_argument("--run-name", default=None, help="Optional human-readable run label.")
-    parser.add_argument("--wandb-project", default=DEFAULT_WANDB_PROJECT)
-    parser.add_argument("--wandb-entity", default=None)
-    parser.add_argument("--wandb-run-name", default=None)
     parser.add_argument("--max-forecast-starts", type=int, default=None)
-    parser.add_argument(
-        "--disable-wandb",
-        action="store_true",
-        help="Run without logging metrics to Weights & Biases.",
-    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -340,44 +331,6 @@ def calculate_summary_metrics(raw: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def wandb_daily_metrics(metrics: dict[str, object]) -> dict[str, float]:
-    keys = [
-        "MAE",
-        "RMSE",
-        "CVRMSE_percent",
-        "sMAPE_percent",
-        "mean_error",
-        "median_absolute_error",
-        "max_absolute_error",
-        "coverage_68_percent",
-        "mean_width_68",
-        "prediction_seconds",
-    ]
-    return {f"daily/{key}": float(metrics[key]) for key in keys if key in metrics and pd.notna(metrics[key])}
-
-
-def log_wandb_summary(wandb_run, summary: pd.DataFrame) -> None:
-    if wandb_run is None:
-        return
-    for _, row in summary.iterrows():
-        scope = safe_name(str(row["metric_scope"]))
-        payload = {}
-        for key in [
-            "MAE",
-            "RMSE",
-            "CVRMSE_percent",
-            "sMAPE_percent",
-            "coverage_68_percent",
-            "mean_width_68",
-            "prediction_seconds_mean_excluding_first",
-            "estimated_setup_time",
-        ]:
-            if key in row and pd.notna(row[key]):
-                payload[f"summary/{scope}/{key}"] = float(row[key])
-        if payload:
-            wandb_run.log(payload)
-
-
 def predict_one_day(
     pipeline,
     data: pd.DataFrame,
@@ -453,7 +406,6 @@ def build_metadata(
     run_dir: Path,
     selected_weeks: pd.DataFrame,
     total_seconds: float,
-    wandb_run,
 ) -> dict[str, object]:
     metadata_payload = metadata_envelope(
         run_id=run_id,
@@ -471,9 +423,6 @@ def build_metadata(
             "prediction_steps": prediction_steps(args.prediction_hours, args.resolution),
             "mode": args.mode,
             "output_dir": str(args.output_dir),
-            "wandb_project": args.wandb_project,
-            "wandb_entity": args.wandb_entity,
-            "wandb_enabled": not args.disable_wandb,
         },
         "selected_forecast_weeks": selected_weeks.to_dict(orient="records"),
         "selected_weeks_source": selected_weeks_source_metadata(args.selected_weeks_path),
@@ -504,10 +453,6 @@ def build_metadata(
         },
         "quantiles": DEFAULT_QUANTILES,
         "interval_definitions": INTERVAL_DEFINITIONS,
-        "wandb": {
-            "run_id": getattr(wandb_run, "id", None) if wandb_run is not None else None,
-            "run_name": getattr(wandb_run, "name", None) if wandb_run is not None else None,
-        },
         "total_seconds": total_seconds,
     })
     return metadata_payload
@@ -587,27 +532,6 @@ def main() -> None:
     print(f"Run directory: {run_dir}")
 
     pipeline = initialize_pipeline(args.mode, max_context_length=max_context_length)
-    wandb_run = initialize_wandb(
-        args,
-        run_id,
-        {
-            "run_id": run_id,
-            "run_name": args.run_name,
-            "resolution": args.resolution,
-            "resolution_frequency": RESOLUTION_TO_FREQ[args.resolution],
-            "context_hours": args.context_hours,
-            "context_days_equivalent": args.context_hours / 24,
-            "prediction_hours": args.prediction_hours,
-            "prediction_steps": prediction_steps(args.prediction_hours, args.resolution),
-            "mode": args.mode,
-            "heat_path": str(args.heat_path),
-            "weather_path": str(args.weather_path),
-            "weather_columns": WEATHER_COLUMNS,
-            "selected_weeks_path": str(args.selected_weeks_path),
-            "selected_forecast_weeks": selected_weeks.to_dict(orient="records"),
-            "quantiles": DEFAULT_QUANTILES,
-        },
-    )
 
     raw_forecasts = []
     metric_rows = []
@@ -624,8 +548,6 @@ def main() -> None:
         )
         raw_forecasts.append(forecast)
         metric_rows.append(metrics)
-        if wandb_run is not None:
-            wandb_run.log(wandb_daily_metrics(metrics), step=day_number)
         print(
             f"[{day_number}/{len(starts)}] MAE={metrics['MAE']:.3f}, "
             f"RMSE={metrics['RMSE']:.3f}, "
@@ -640,14 +562,10 @@ def main() -> None:
     metrics.to_csv(metrics_output_path, index=False)
     summary.to_csv(summary_output_path, index=False)
 
-    if wandb_run is not None:
-        log_wandb_summary(wandb_run, summary)
-        wandb_run.finish()
-
     total_seconds = time.perf_counter() - total_start
     write_metadata(
         metadata_path,
-        build_metadata(args, run_id, run_dir, selected_weeks, total_seconds, wandb_run),
+        build_metadata(args, run_id, run_dir, selected_weeks, total_seconds),
     )
 
     print(f"Completed forecast starts: {len(starts):,}")

@@ -4,7 +4,6 @@ __pycache__/
 venv/
 .cache/
 outputs/
-wandb/
 *.log
 *.out
 *.err
@@ -17,3 +16,5 @@ munich/supply/
 munich/daily/
 munich/weather/munich_weather_with_solar_precipitation.csv
 munich/weather/munich_weather_with_solar_precipitation_metadata.json
+munich/weather/munich_temperature_observed_vs_forecast_2024.csv
+munich/weather/munich_temperature_observed_vs_forecast_2024_metadata.json

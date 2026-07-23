@@ -2,7 +2,7 @@
 
 This folder contains the shareable experiment code used for the TabPFN-TS, Chronos-2, AutoGluon, and Multi-Resolution Residual-Correction Forecaster evaluations.
 
-The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, W&B run folders, data-scraper/preparation scripts, and private Munich heat-demand data.
+The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, data-scraper/preparation scripts, and unpublished Munich input data.
 
 <!-- TODO(publication): Add scripts/prepare_flensburg_heat.py and
 scripts/build_flensburg_weather_temperature.py. Then revise the statement above
@@ -29,10 +29,9 @@ data-preparation workflow instead of saying that all preparation scripts are exc
   - `full_year_forecasting_utils.py`, `autogluon_forecasting_utils.py`, `tabpfn_ts_heat_forecast.py`, and `utils.py`: shared data, forecasting, and experiment-runtime helpers.
 - `flensburg/`
   - Full Flensburg validation data, including heat demand, weather data, and the selected representative weeks.
-- `munich/weather/`
-  - Generalized Munich weather-comparison input used by the experiments.
-  - Exact target coordinates and enriched-weather source artifacts are deliberately excluded.
-  - Munich heat-demand data are deliberately not included.
+- Munich experiment inputs are deliberately excluded.
+  - Munich heat-demand and weather-comparison files are not published.
+  - The Munich experiment scripts require explicitly supplied, properly licensed input files.
 
 ## Setup
 
@@ -45,23 +44,35 @@ python -m pip install -r requirements.txt
 
 The experiment versions are pinned to `tabpfn-time-series==1.1.0`, `tabpfn==8.0.3`, `chronos-forecasting==2.2.2`, and `autogluon.timeseries==1.5.0`. TimesFM is not an environment dependency. Chronos-2 is run only through the dedicated Chronos scripts, while the AutoGluon benchmarks use AutoGluon's tabular, statistical, and optional neural models without custom Chronos-2 or TimesFM wrappers.
 
+## License
+
+Except where otherwise noted, the original source code, project-authored
+documentation, and synthetic test fixtures in this repository are licensed
+under the [MIT License](LICENSE).
+
+Datasets and third-party materials are not covered by the MIT License. They
+remain subject to their respective licenses and attribution requirements, as
+documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), the
+[LICENSES](LICENSES/) directory, and the accompanying metadata files.
+
+The software is provided without warranty of any kind.
+
 ## Usage Notes
 
 Run scripts from the root of this folder so the relative data paths resolve correctly:
 
 ```bash
-python scripts/tabpfn_ts_full_year_2024.py --disable-wandb
-python scripts/chronos2_full_year_2024.py --disable-wandb
+python scripts/tabpfn_ts_full_year_2024.py
+python scripts/chronos2_full_year_2024.py
 python scripts/autogluon_full_year_2024.py
 ```
 
-For Munich experiments, provide the private Munich heat-demand file explicitly:
+For Munich experiments, provide properly licensed local heat-demand and weather files explicitly:
 
 ```bash
 python scripts/tabpfn_ts_full_year_2024.py \
   --heat-path path/to/private/munich/heat_dh.csv \
-  --weather-path path/to/private/munich/munich_weather_with_solar_precipitation.csv \
-  --disable-wandb
+  --weather-path path/to/private/munich/munich_weather_with_solar_precipitation.csv
 ```
 
 For Flensburg validation runs, use the included data:
@@ -71,8 +82,7 @@ python scripts/tabpfn_ts_full_year_2024.py \
   --dataset-name flensburg \
   --heat-path flensburg/demand/heat/heat_dh.csv \
   --weather-path flensburg/weather/flensburg_weather_temperature.csv \
-  --weather-columns temperature \
-  --disable-wandb
+  --weather-columns temperature
 ```
 
 The included Flensburg heat-demand series is hourly. It supports hourly experiments, but not the 15-minute stacked-residual experiments; those scripts exit immediately because hourly heat data cannot supply quarter-hour residual targets.

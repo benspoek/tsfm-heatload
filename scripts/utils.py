@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import platform
 import sys
 from collections.abc import Iterable, Mapping
@@ -29,7 +28,6 @@ CHRONOS_PACKAGES = (
     "huggingface_hub",
     "pandas",
     "numpy",
-    "wandb",
 )
 TABPFN_PACKAGES = (
     "tabpfn-time-series",
@@ -37,7 +35,6 @@ TABPFN_PACKAGES = (
     "pandas",
     "numpy",
     "scikit-learn",
-    "wandb",
 )
 
 
@@ -63,34 +60,6 @@ def package_versions(packages: Iterable[str]) -> dict[str, str | None]:
         except metadata.PackageNotFoundError:
             versions[package] = None
     return versions
-
-
-def initialize_wandb(
-    args: Any,
-    run_id: str,
-    config: Mapping[str, Any],
-    tags: Iterable[str] = (),
-):
-    if args.disable_wandb:
-        return None
-    try:
-        import wandb
-    except ImportError as exc:
-        raise SystemExit("Missing dependency. Install it with: python -m pip install -r requirements.txt") from exc
-
-    configured_tags = [tag.strip() for tag in tags if tag.strip()]
-    environment_tags = [
-        tag.strip() for tag in os.environ.get("WANDB_RUN_TAGS", "").split(",") if tag.strip()
-    ]
-    all_tags = sorted(set([*configured_tags, *environment_tags]))
-    return wandb.init(
-        project=args.wandb_project,
-        entity=args.wandb_entity,
-        name=getattr(args, "wandb_run_name", None) or getattr(args, "run_name", None) or run_id,
-        group=getattr(args, "wandb_group", None) or os.environ.get("WANDB_RUN_GROUP") or None,
-        tags=all_tags or None,
-        config=dict(config),
-    )
 
 
 def metadata_envelope(

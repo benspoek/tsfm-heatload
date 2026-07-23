@@ -21,13 +21,11 @@ from full_year_forecasting_utils import (
     forecast_starts_from_rows,
     load_merged_data,
     metric_values,
-    safe_name,
     sha256_file,
     validate_regular_rows,
 )
 from utils import (
     TABPFN_PACKAGES,
-    initialize_wandb,
     make_run_id,
     metadata_envelope,
     parse_weather_columns,
@@ -39,7 +37,6 @@ DEFAULT_HEAT_PATH = Path("flensburg/demand/heat/heat_dh.csv")
 DEFAULT_WEATHER_PATH = Path("flensburg/weather/flensburg_weather_temperature.csv")
 DEFAULT_OUTPUT_DIR = Path("outputs/experiments/full_year_2024/tabpfn")
 DEFAULT_RUN_NAME = "tabpfn_full_year_2024_hourly_pred24h_context12w_temperature"
-DEFAULT_WANDB_PROJECT = "timeseries-forecasting"
 RESOLUTION_STEPS = {"hourly": 1, "quarter": STEPS_PER_HOUR}
 RESOLUTION_TIMESTEPS = {"hourly": HOURLY_STEP, "quarter": QUARTER_STEP}
 DEFAULT_QUANTILES = [
@@ -88,11 +85,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--forecast-every-hours", type=int, default=24)
     parser.add_argument("--mode", choices=("CLIENT", "LOCAL"), default="LOCAL")
     parser.add_argument("--max-forecast-starts", type=int, default=None)
-    parser.add_argument("--wandb-project", default=DEFAULT_WANDB_PROJECT)
-    parser.add_argument("--wandb-entity", default=None)
-    parser.add_argument("--wandb-run-name", default=None)
-    parser.add_argument("--wandb-group", default=None)
-    parser.add_argument("--disable-wandb", action="store_true")
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -113,19 +105,6 @@ def initialize_pipeline(mode: str, max_context_length: int):
         tabpfn_mode=getattr(TabPFNMode, mode),
         max_context_length=max_context_length,
     )
-
-
-def log_wandb_summary(wandb_run, summary: pd.DataFrame) -> None:
-    if wandb_run is None:
-        return
-    payload = {}
-    for _, row in summary.iterrows():
-        scope = safe_name(str(row["metric_scope"]))
-        for key in ["MAE", "RMSE", "R2", "CVRMSE_percent", "sMAPE_percent"]:
-            if key in row and pd.notna(row[key]):
-                payload[f"summary/{scope}/{key}"] = float(row[key])
-    if payload:
-        wandb_run.log(payload)
 
 
 def predict_one_start(
@@ -305,23 +284,6 @@ def main() -> None:
     (run_dir / "command.txt").write_text(" ".join(sys.argv) + "\n", encoding="utf-8")
 
     pipeline = initialize_pipeline(args.mode, max_context_length=context_steps)
-    wandb_run = initialize_wandb(
-        args,
-        run_id,
-        {
-            "run_id": run_id,
-            "run_name": args.run_name,
-            "dataset_name": args.dataset_name,
-            "year": args.year,
-            "resolution": args.resolution,
-            "context_hours": args.context_hours,
-            "prediction_hours": args.prediction_hours,
-            "forecast_every_hours": args.forecast_every_hours,
-            "weather_columns": weather_columns,
-            "mode": args.mode,
-        },
-    )
-
     raw_forecasts = []
     metric_rows = []
     for idx, row in starts.iterrows():
@@ -353,10 +315,6 @@ def main() -> None:
     raw.to_csv(run_dir / "raw_predictions.csv", index=False)
     metrics.to_csv(run_dir / "metrics_per_forecast_start.csv", index=False)
     summary.to_csv(run_dir / "metrics_summary.csv", index=False)
-
-    if wandb_run is not None:
-        log_wandb_summary(wandb_run, summary)
-        wandb_run.finish()
 
     total_seconds = time.perf_counter() - total_start
     write_metadata(

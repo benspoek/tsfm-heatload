@@ -20,7 +20,6 @@ from full_year_forecasting_utils import (
 )
 from utils import (
     CHRONOS_PACKAGES,
-    initialize_wandb,
     make_run_id,
     metadata_envelope,
     parse_weather_columns,
@@ -31,7 +30,6 @@ from utils import (
 DEFAULT_HEAT_PATH = chronos_extreme.DEFAULT_HEAT_PATH
 DEFAULT_WEATHER_PATH = chronos_extreme.DEFAULT_WEATHER_PATH
 DEFAULT_OUTPUT_DIR = Path("outputs/experiments/extreme_weeks_2024")
-DEFAULT_WANDB_PROJECT = "timeseries-forecasting"
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,9 +54,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device-map", default="cuda")
     parser.add_argument("--max-context-steps", type=int, default=chronos_extreme.DEFAULT_MAX_CONTEXT_STEPS)
     parser.add_argument("--max-forecast-starts", type=int, default=None)
-    parser.add_argument("--wandb-project", default=DEFAULT_WANDB_PROJECT)
-    parser.add_argument("--wandb-entity", default=None)
-    parser.add_argument("--disable-wandb", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
@@ -130,7 +125,6 @@ def build_metadata(
     starts: list[tuple[str, str, pd.Timestamp, pd.Timestamp, pd.Timestamp]],
     weather_columns: list[str],
     total_seconds: float,
-    wandb_run,
 ) -> dict[str, object]:
     payload = metadata_envelope(
         run_id=run_id,
@@ -160,7 +154,6 @@ def build_metadata(
             "device_map": args.device_map,
             "weather_columns": weather_columns,
             "output_dir": str(args.output_dir),
-            "wandb_enabled": not args.disable_wandb,
         },
         "evaluation": {
             "policy": "latest_forecast_wins_within_selected_weeks",
@@ -204,10 +197,6 @@ def build_metadata(
         },
         "quantiles": chronos_extreme.DEFAULT_QUANTILES,
         "interval_definitions": chronos_extreme.INTERVAL_DEFINITIONS,
-        "wandb": {
-            "run_id": getattr(wandb_run, "id", None) if wandb_run is not None else None,
-            "run_name": getattr(wandb_run, "name", None) if wandb_run is not None else None,
-        },
         "total_seconds": total_seconds,
     })
     return payload
@@ -287,40 +276,6 @@ def main() -> None:
     (run_dir / "command.txt").write_text(" ".join(sys.argv) + "\n", encoding="utf-8")
 
     pipeline = chronos_extreme.initialize_pipeline(args)
-    wandb_run = initialize_wandb(
-        args,
-        run_id,
-        {
-            "run_id": run_id,
-            "run_name": args.run_name,
-            "model": chronos_extreme.MODEL_NAME,
-            "model_path": args.model_path,
-            "resolution": args.resolution,
-            "context_hours": args.context_hours,
-            "requested_context_steps": chronos_extreme.requested_context_steps(
-                args.context_hours,
-                args.resolution,
-            ),
-            "max_context_steps": args.max_context_steps,
-            "effective_context_steps": chronos_extreme.effective_context_steps(
-                args.context_hours,
-                args.resolution,
-                args.max_context_steps,
-            ),
-            "prediction_hours": args.prediction_hours,
-            "prediction_steps": chronos_extreme.prediction_steps(args.prediction_hours, args.resolution),
-            "forecast_every_hours": args.forecast_every_hours,
-            "forecast_every_steps": chronos_extreme.prediction_steps(
-                args.forecast_every_hours,
-                args.resolution,
-            ),
-            "evaluation_policy": "latest_forecast_wins_within_selected_weeks",
-            "weather_columns": weather_columns,
-            "selected_weeks_path": str(args.selected_weeks_path),
-            "selected_forecast_weeks": selected_weeks.to_dict(orient="records"),
-        },
-        tags=("chronos2", "direct", "extreme_weeks", "overlapping_horizon"),
-    )
 
     raw_forecasts = []
     for idx, (selection, week_id, week_start, week_end, forecast_start) in enumerate(starts, start=1):
@@ -337,8 +292,6 @@ def main() -> None:
         )
         issued = add_week_bounds(issued, week_start=week_start, week_end=week_end)
         raw_forecasts.append(issued)
-        if wandb_run is not None:
-            wandb_run.log(chronos_extreme.wandb_forecast_metrics(metrics), step=idx)
         print(
             f"[{idx}/{len(starts)}] issued RMSE={metrics['RMSE']:.3f}, "
             f"issued CVRMSE={metrics['CVRMSE_percent']:.2f}%, "
@@ -357,14 +310,10 @@ def main() -> None:
     metrics.to_csv(run_dir / "metrics_per_forecast_start.csv", index=False)
     summary.to_csv(run_dir / "metrics_summary.csv", index=False)
 
-    if wandb_run is not None:
-        chronos_extreme.log_wandb_summary(wandb_run, summary)
-        wandb_run.finish()
-
     total_seconds = time.perf_counter() - total_start
     write_metadata(
         run_dir / "run_metadata.json",
-        build_metadata(args, run_id, selected_weeks, starts, weather_columns, total_seconds, wandb_run),
+        build_metadata(args, run_id, selected_weeks, starts, weather_columns, total_seconds),
     )
 
     print(f"Issued forecast rows: {len(raw):,}")
