@@ -1,0 +1,36 @@
+{
+  "created_at_utc": "2026-06-02T13:17:01.442480+00:00",
+  "script": "build_flensburg_weather_temperature.py",
+  "heat_path": "flensburg\\demand\\heat\\heat_dh.csv",
+  "output_path": "flensburg\\weather\\flensburg_weather_temperature.csv",
+  "dwd_base_url": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/air_temperature/historical/",
+  "target_lat": 54.7937,
+  "target_lon": 9.4469,
+  "timezone": "Europe/Berlin",
+  "dwd_timezone": "UTC",
+  "selected_station": {
+    "station_id": "01666",
+    "name": "Gl\u00fccksburg-Meierwik",
+    "state": "Schleswig-Holstein",
+    "height_m": 12.0,
+    "lat": 54.8273,
+    "lon": 9.5058,
+    "distance_km": 5.31075379159785
+  },
+  "coverage": {
+    "rows": 43848,
+    "start": "2020-01-01T00:00:00+01:00",
+    "end": "2024-12-31T23:00:00+01:00",
+    "missing_temperature": 0
+  },
+  "candidate_attempts": [
+    {
+      "station_id": "01666",
+      "name": "Gl\u00fccksburg-Meierwik",
+      "distance_km": 5.31075379159785,
+      "missing_total": 0,
+      "missing_2023_2024": 0
+    }
+  ],
+  "raw_temperature_rows": 200577
+}

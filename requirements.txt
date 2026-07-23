@@ -1,0 +1,13 @@
+# Cluster runtime: Python 3.12.3 and CUDA 12.6.3
+numpy==2.3.5
+pandas==2.2.3
+scikit-learn==1.7.1
+matplotlib==3.10.8
+torch==2.7.1
+transformers==4.57.6
+huggingface-hub==0.36.0
+chronos-forecasting==2.2.2
+tabpfn==8.0.3
+tabpfn-time-series==1.1.0
+autogluon.timeseries==1.5.0
+openpyxl==3.1.5

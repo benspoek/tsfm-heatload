@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.cache/
+outputs/
+*.log
+*.out
+*.err
+*.tmp
+
+# Private Munich data must not be added to this release.
+munich/demand/
+munich/raw/
+munich/supply/
+munich/daily/
+munich/weather/munich_weather_with_solar_precipitation.csv
+munich/weather/munich_weather_with_solar_precipitation_metadata.json
+munich/weather/munich_temperature_observed_vs_forecast_2024.csv
+munich/weather/munich_temperature_observed_vs_forecast_2024_metadata.json
