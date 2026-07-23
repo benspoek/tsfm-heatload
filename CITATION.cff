@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it using the metadata below."
+title: "Systematic Evaluation of TabPFN-TS for Zero-Shot Probabilistic Heat Load Forecasting in District Heating Networks"
+type: software
+authors:
+  - family-names: Spoek
+    given-names: Ben
+    orcid: "https://orcid.org/0009-0005-7791-4948"
+    affiliation: "Chair of Energy Efficient Buildings and Indoor Climate, RWTH Aachen University"
+  - family-names: "Ben Hicham"
+    given-names: "Karim K."
+    orcid: "https://orcid.org/0000-0001-7125-1956"
+    affiliation: "Process Systems Engineering, RWTH Aachen University"
+  - family-names: Derzsi
+    given-names: Kai
+    orcid: "https://orcid.org/0009-0000-3797-9580"
+    affiliation: "Chair of Energy Efficient Buildings and Indoor Climate, RWTH Aachen University"
+  - family-names: Althaus
+    given-names: Philipp
+    orcid: "https://orcid.org/0000-0002-0800-2655"
+    affiliation: "Chair of Energy Efficient Buildings and Indoor Climate, RWTH Aachen University"
+  - family-names: Mitsos
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0003-0335-6566"
+    affiliation: "Process Systems Engineering, RWTH Aachen University"
+  - family-names: Müller
+    given-names: Dirk
+    orcid: "https://orcid.org/0000-0002-6106-6607"
+    affiliation: "Chair of Energy Efficient Buildings and Indoor Climate, RWTH Aachen University"
+doi: "10.5281/zenodo.21511738"
+repository-code: "https://github.com/benspoek/tsfm-heatload"
+url: "https://doi.org/10.5281/zenodo.21511738"

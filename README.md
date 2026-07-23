@@ -1,15 +1,10 @@
-# Heat Load Forecasting Experiment Code
+# Systematic Evaluation of TabPFN-TS for Zero-Shot Probabilistic Heat Load Forecasting in District Heating Networks
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21511738.svg)](https://doi.org/10.5281/zenodo.21511738)
 
 This folder contains the shareable experiment code used for the TabPFN-TS, Chronos-2, AutoGluon, and Multi-Resolution Residual-Correction Forecaster evaluations.
 
 The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, data-scraper/preparation scripts, and unpublished Munich input data.
-
-<!-- TODO(publication): Add scripts/prepare_flensburg_heat.py and
-scripts/build_flensburg_weather_temperature.py. Then revise the statement above
-and the Contents and usage documentation to describe the reproducible Flensburg
-data-preparation workflow instead of saying that all preparation scripts are excluded. -->
 
 ## Contents
 
@@ -48,7 +43,10 @@ The experiment versions are pinned to `tabpfn-time-series==1.1.0`, `tabpfn==8.0.
 
 ## Citation
 
-The archived release is available from Zenodo:
+Citation metadata for this repository are provided in
+[`CITATION.cff`](CITATION.cff), and the corresponding Zenodo release metadata
+are provided in [`.zenodo.json`](.zenodo.json). The archived release is
+available from Zenodo:
 [doi:10.5281/zenodo.21511738](https://doi.org/10.5281/zenodo.21511738).
 
 ## License
