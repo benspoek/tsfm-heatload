@@ -76,6 +76,44 @@ temperature, the coldest week by mean temperature, and the week with the
 largest temperature range. Processing details are recorded in the adjacent
 metadata file and `scripts/select_flensburg_representative_weeks.py`.
 
+## ECMWF IFS Retrospective Temperature Predictions
+
+**Affected paths**
+
+- `flensburg/weather/flensburg_temperature_observed_vs_ecmwf_coherent.csv`
+- `flensburg/weather/flensburg_temperature_observed_vs_ecmwf_coherent_metadata.json`
+
+**Source and attribution**
+
+Weather data by Open-Meteo using ECMWF IFS HRES, retrieved from the
+Open-Meteo Single Runs API:
+https://open-meteo.com/en/docs/single-runs-api
+
+The 2024 archive contains IFS Cycle 49R1 hindcasts. Run initialization times
+are model reference times, not observed historical publication times.
+The observed-temperature column uses the DWD station identified above.
+
+**License**
+
+Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+Open-Meteo's data license and attribution guidance:
+https://open-meteo.com/en/licence
+
+A copy of the license is provided in `LICENSES/CC-BY-4.0.txt`.
+
+**Modifications**
+
+The extract selects 2 m temperature at the Flensburg coordinates
+54.7937 N, 9.4469 E. Each daily 24-hour horizon selects one coherent trajectory
+from the preceding 12:00 UTC initialization, converts valid times to
+`Europe/Berlin`, and aligns the predictions with the existing hourly DWD
+temperature index. The comparison CSV retains observed historical context
+and records each prediction's issue time, run initialization and lead time.
+The adjacent metadata file records source requests, processing and checksums.
+Heat observations are not included in this derived weather file.
+
 ## Software Dependencies
 
 Python packages listed in `requirements.txt` are dependencies and are not

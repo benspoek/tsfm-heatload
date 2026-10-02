@@ -124,31 +124,6 @@ def read_weather_csv(path: Path, weather_columns: list[str]) -> pd.DataFrame:
     return weather
 
 
-def read_weather_comparison_csv(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        raise FileNotFoundError(f"Weather comparison file not found: {path}")
-    weather = pd.read_csv(path)
-    required = {"date", "temperature_observed", "temperature_forecast_24h"}
-    missing = sorted(required - set(weather.columns))
-    if missing:
-        raise ValueError(f"Weather comparison file is missing columns: {missing}")
-    weather["timestamp"] = parse_timestamp_series(weather["date"])
-    weather = (
-        weather[["timestamp", "temperature_observed", "temperature_forecast_24h"]]
-        .copy()
-        .sort_values("timestamp")
-        .reset_index(drop=True)
-    )
-    # Missing archived forecasts are allowed here and checked for each requested window.
-    validate_timeseries_frame(
-        weather,
-        ["temperature_observed"],
-        f"weather comparison data ({path})",
-        expected_step=HOURLY_STEP,
-    )
-    return weather
-
-
 def infer_native_step(df: pd.DataFrame, label: str) -> pd.Timedelta:
     timestamps = df["timestamp"].sort_values()
     deltas = timestamps.diff().dropna()
@@ -325,19 +300,6 @@ def load_residual_multiresolution_data(
         label="stacked base data",
     )
     return quarter, hourly
-
-
-def load_heat_weather_comparison_data(heat_path: Path, weather_path: Path) -> pd.DataFrame:
-    heat = aggregate_to_step(read_heat_csv(heat_path), ["heat"], HOURLY_STEP, label="heat")
-    weather = read_weather_comparison_csv(weather_path)
-    return align_timeseries_frames(
-        heat,
-        weather,
-        left_value_columns=["heat"],
-        right_value_columns=["temperature_observed"],
-        step=HOURLY_STEP,
-        label="merged heat/weather comparison data",
-    )
 
 
 def to_naive_datetime(values: pd.Series) -> pd.Series:
