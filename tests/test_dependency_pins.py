@@ -17,7 +17,7 @@ class DependencyPinTests(unittest.TestCase):
         ]
 
         expected = {
-            "torch==2.7.1",
+            "torch==2.9.1",
             "tabpfn-time-series==1.1.0",
             "tabpfn==8.0.3",
             "chronos-forecasting==2.2.2",

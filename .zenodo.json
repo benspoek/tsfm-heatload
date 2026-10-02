@@ -1,7 +1,7 @@
 {
-  "title": "Systematic Evaluation of TabPFN-TS for Zero-Shot Probabilistic Heat Load Forecasting in District Heating Networks",
+  "title": "Systematic Evaluation of TabPFN-TS and Chronos-2 for Zero-Shot Heat Load Forecasting in District Heating Networks",
   "upload_type": "software",
-  "description": "Software and reproducibility package supporting the systematic evaluation of TabPFN-TS for probabilistic heat load forecasting in district heating networks. The repository contains the shareable TabPFN-TS, Chronos-2, AutoGluon, and Multi-Resolution Residual-Correction Forecaster experiment pipelines, shared utilities, tests, and public Flensburg validation inputs. Unpublished Munich inputs, generated model outputs, plotting scripts, and paper-writing files are not included, so Munich-specific results require separately supplied, properly licensed data. Original project code is licensed under the MIT License. Included datasets and third-party materials retain their original licenses, as documented in THIRD_PARTY_NOTICES.md and the accompanying metadata files.",
+  "description": "Software supporting the systematic evaluation of TabPFN-TS and Chronos-2 for zero-shot heat load forecasting in district heating networks. The package reproduces full-year Flensburg forecasts with TabPFN-TS, Chronos-2, and AutoGluon using included public hourly heat-load and temperature inputs. It retains earlier selected-week, weather-sensitivity, and Multi-Resolution Residual-Correction Forecaster scripts, with their scope and limitations documented in README.md. The Flensburg example weeks are distinct from the paper’s Munich configuration weeks; the retained fixed-lead weather-sensitivity scripts do not reproduce the revised coherent ECMWF IFS hindcast analysis. Separate metric-analysis, bootstrap, PIT, plotting, and paper-writing pipelines, generated outputs, and unpublished Munich inputs are not included. Existing runner metric outputs are retained. Original project code is licensed under the MIT License. Included datasets and third-party materials retain their original licenses, as documented in THIRD_PARTY_NOTICES.md and the accompanying metadata files.",
   "creators": [
     {
       "name": "Spoek, Ben",
@@ -54,5 +54,6 @@
       "relation": "isDerivedFrom",
       "resource_type": "dataset"
     }
-  ]
+  ],
+  "version": "1.0.1"
 }

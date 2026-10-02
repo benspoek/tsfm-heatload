@@ -1,7 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it using the metadata below."
-title: "Systematic Evaluation of TabPFN-TS for Zero-Shot Probabilistic Heat Load Forecasting in District Heating Networks"
+title: "Systematic Evaluation of TabPFN-TS and Chronos-2 for Zero-Shot Heat Load Forecasting in District Heating Networks"
 type: software
+version: "1.0.1"
 authors:
   - family-names: Spoek
     given-names: Ben
@@ -27,6 +28,6 @@ authors:
     given-names: Dirk
     orcid: "https://orcid.org/0000-0002-6106-6607"
     affiliation: "Chair of Energy Efficient Buildings and Indoor Climate, RWTH Aachen University"
-doi: "10.5281/zenodo.21511738"
+doi: "10.5281/zenodo.21511737"
 repository-code: "https://github.com/benspoek/tsfm-heatload"
-url: "https://doi.org/10.5281/zenodo.21511738"
+url: "https://doi.org/10.5281/zenodo.21511737"
