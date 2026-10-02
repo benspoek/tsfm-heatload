@@ -4,7 +4,7 @@
 
 This repository reproduces the paper’s full-year Flensburg forecasts with TabPFN-TS, Chronos-2, and AutoGluon using the included public heat-load and temperature inputs. It also includes representative-week, weather-sensitivity, and Multi-Resolution Residual-Correction Forecaster scripts.
 
-The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, data-scraper/preparation scripts, and proprietary Munich input data.
+The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, and proprietary Munich input data.
 
 ## Contents
 
@@ -18,14 +18,15 @@ The folder intentionally excludes paper-writing files, plotting scripts, Slurm w
   - `tabpfn_ts_heat_backtest_extreme_weeks_overlapping.py`: TabPFN-TS overlapping selected-week forecasts.
   - `chronos2_heat_backtest_extreme_weeks_overlapping.py`: Chronos-2 overlapping selected-week forecasts.
   - `tabpfn_ts_heat_backtest_relevant_context_2024.py`: TabPFN-TS recent-versus-seasonally-relevant context experiment.
-  - `tabpfn_weather_forecast_effect_2024.py`: Legacy TabPFN-TS weather-sensitivity example using fixed 24-hour-lead temperatures.
-  - `chronos2_weather_forecast_effect_2024.py`: Legacy Chronos-2 weather-sensitivity example using fixed 24-hour-lead temperatures.
+  - `tabpfn_weather_forecast_effect_2024.py`: TabPFN-TS weather sensitivity with coherent ECMWF IFS retrospective temperature predictions.
+  - `chronos2_weather_forecast_effect_2024.py`: Chronos-2 weather sensitivity with coherent ECMWF IFS retrospective temperature predictions.
+  - `build_flensburg_ecmwf_coherent_predictions.py`: downloads and prepares the fixed Flensburg IFS temperature input.
   - `stacked_residual_full_year_2024.py`: TabPFN-TS MRRC full-year forecast.
   - `chronos2_stacked_residual_full_year_2024.py`: Chronos-2 MRRC full-year forecast.
   - `select_flensburg_representative_weeks.py`: reproducibly selects the three Flensburg representative weeks.
   - `full_year_forecasting_utils.py`, `autogluon_forecasting_utils.py`, `tabpfn_ts_heat_forecast.py`, and `utils.py`: shared data, forecasting, and experiment-runtime helpers.
 - `flensburg/`
-  - Full Flensburg validation data, including heat demand, weather data, and the selected representative weeks.
+  - Full Flensburg validation data, including heat demand, observed temperatures, coherent IFS temperature predictions, and the selected representative weeks.
 - Munich experiment inputs are deliberately excluded.
   - Munich heat-demand and weather-comparison files are not published.
   - The Munich experiment scripts require explicitly supplied, properly licensed input files.
@@ -85,7 +86,7 @@ python -m unittest discover -s tests
 
 These checks validate data handling and scheduling; they do not verify GPU prediction accuracy or reproduce numerical paper results by themselves.
 
-The included Flensburg heat-demand series is hourly. It supports hourly experiments, but not the 15-minute stacked-residual experiments; those scripts exit immediately because hourly heat data cannot supply quarter-hour residual targets. Munich scripts require separately supplied, properly licensed inputs; no Munich data or new experiments are included in this release.
+The included Flensburg heat-demand series is hourly. It supports hourly experiments, but not the 15-minute stacked-residual experiments; those scripts exit immediately because hourly heat data cannot supply quarter-hour residual targets. Munich scripts require separately supplied, properly licensed inputs; no Munich data are included in this release.
 
 ## Representative Weeks
 
@@ -103,15 +104,30 @@ The selections are stored in `flensburg/weather/representative_weeks_2024.csv` a
 python scripts/select_flensburg_representative_weeks.py
 ```
 
-## Retained legacy weather-sensitivity scripts
+## Weather sensitivity with coherent IFS predictions
 
-`tabpfn_weather_forecast_effect_2024.py` and `chronos2_weather_forecast_effect_2024.py` use the older `temperature_forecast_24h` covariate assembled from fixed 24-hour-lead predictions. They are retained as legacy supplementary examples and do not reproduce the revised paper’s coherent ECMWF IFS retrospective weather predictions. They require separately supplied Munich weather-comparison inputs.
+The included `flensburg/weather/flensburg_temperature_observed_vs_ecmwf_coherent.csv` contains observed temperatures and ECMWF IFS HRES retrospective temperature predictions obtained from the [Open-Meteo Single Runs API](https://open-meteo.com/en/docs/single-runs-api). Each 24-hour heat forecast uses one complete temperature trajectory from the preceding 12:00 UTC initialization. For the 2024 issuance schedule, initialization precedes issuance by 11 hours and the trajectory's lead times range from 11 to 34 hours. The archive contains IFS Cycle 49R1 hindcasts; their initialization timestamps do not establish when forecasts were actually published in 2024.
+
+Run the sensitivity comparisons using the included fixed inputs, without downloading data during forecasting:
+
+```bash
+python scripts/tabpfn_weather_forecast_effect_2024.py
+python scripts/chronos2_weather_forecast_effect_2024.py
+```
+
+Each runner compares the measured-temperature reference with the corresponding configuration selected in the revised paper. Both use measured and predicted temperatures as separate historical covariates in the predicted-weather configuration. TabPFN-TS fills both future temperature columns with the identical IFS trajectory; Chronos-2 uses only predicted temperature as a future covariate. Future heat targets are excluded. These are Flensburg sensitivity runs using the paper's method; the manuscript's Munich sensitivity results require the private Munich inputs.
+
+The IFS input contains 292 daily trajectories from 15 March to 31 December 2024. A common completeness mask requires twelve weeks of historical predicted temperatures for every configuration, including the measured reference. This leaves 208 matched starts from 7 June to 31 December, with 4,992 hourly predictions per configuration. Historical predicted temperatures retain the trajectories assigned to their historical issue times. These counts apply to weather sensitivity; the principal full-year runs above still use 366 starts.
+
+Add `--dry-run` to either command to validate all input windows without loading models or writing outputs. Alternative covariate configurations are available through `--covariate-modes`; see `--help` for the supported modes. To obtain the IFS input again, run `python scripts/build_flensburg_ecmwf_coherent_predictions.py` as a separate preparation step. The adjacent metadata file records the source requests, coordinates, run assignments, processing, and checksums.
 
 ## Data Sources and Licenses
 
 The Flensburg heat-network source workbook is from Freißmann, Fritz, Tuschy, and Stadtwerke Flensburg GmbH, *Network Data of the District Heating System for the city of Flensburg from 2020-2024*, version 1.0.0, [doi:10.5281/zenodo.17177421](https://doi.org/10.5281/zenodo.17177421). It is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). The included `flensburg/demand/heat/heat_dh.csv` is an adapted, hourly, timezone-aware extract; its processing details are recorded in the adjacent metadata file.
 
 The Flensburg temperature series is adapted from the [Deutscher Wetterdienst Climate Data Center](https://opendata.dwd.de/climate_environment/CDC/) and is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Source: Deutscher Wetterdienst. The selected station and processing coverage are recorded in `flensburg/weather/flensburg_weather_temperature_metadata.json`.
+
+The IFS temperature predictions are supplied by [Open-Meteo](https://open-meteo.com/) using ECMWF IFS HRES and are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The comparison CSV combines these predictions with the attributed DWD observations and records the selected daily trajectories. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the adjacent IFS metadata file for attribution and processing details.
 
 Most scripts write the same output structure to `outputs/`:
 
