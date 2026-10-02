@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21511737.svg)](https://doi.org/10.5281/zenodo.21511737)
 
-This repository reproduces the paper’s full-year Flensburg forecasts with TabPFN-TS, Chronos-2, and AutoGluon using the included public heat-load and temperature inputs. It also retains earlier selected-week, weather-sensitivity, and Multi-Resolution Residual-Correction Forecaster scripts. Separate scripts for paper metrics, bootstrap inference, PIT diagnostics, tables, and figures are outside this release’s scope. Existing runner metric outputs are retained.
+This repository reproduces the paper’s full-year Flensburg forecasts with TabPFN-TS, Chronos-2, and AutoGluon using the included public heat-load and temperature inputs. It also includes representative-week, weather-sensitivity, and Multi-Resolution Residual-Correction Forecaster scripts.
 
-The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, data-scraper/preparation scripts, and unpublished Munich input data.
+The folder intentionally excludes paper-writing files, plotting scripts, Slurm wrappers, logs, caches, data-scraper/preparation scripts, and proprietary Munich input data.
 
 ## Contents
 
@@ -41,32 +41,11 @@ python -m pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/
 python -m pip install -r requirements.txt
 ```
 
-`requirements.txt` is a reconstructed shared environment aligned with the recorded Flensburg package versions, rather than a complete lockfile of every original run. The stored run metadata document:
-
-| Package | TabPFN-TS | Chronos-2 | AutoGluon |
-| --- | --- | --- | --- |
-| Python | 3.12.3 | 3.12.3 | 3.12.3 |
-| pandas | 2.3.3 | 2.3.3 | 2.3.3 |
-| NumPy | 2.1.3 | 2.1.3 | 2.1.3 |
-| Model packages | tabpfn-time-series 1.1.0; tabpfn 8.0.3 | chronos-forecasting 2.2.2 | autogluon.timeseries 1.5.0; autogluon.tabular 1.5.0 |
-| PyTorch | Not recorded | 2.9.1 | Not recorded |
-| transformers | Not recorded | 4.57.6 | Not recorded |
-| huggingface-hub | Not recorded | 0.36.2 | Not recorded |
-| LightGBM / XGBoost | Not recorded | Not recorded | 4.6.0 / 3.1.3 |
-
-The shared pins for PyTorch, transformers, and huggingface-hub follow the recorded Chronos-2 environment; the metadata do not establish their original versions for TabPFN-TS or AutoGluon. Other retained support-package pins are installation choices, not claims about a recorded original environment. Transitive dependencies are not fully pinned, and no new GPU benchmark is implied by this environment reconstruction.
-
-TabPFN-TS local inference requires access to the TabPFN model weights and may require Hugging Face authentication. Chronos-2 downloads `amazon/chronos-2`. TimesFM is not an environment dependency. Chronos-2 is run through the dedicated Chronos scripts, while the AutoGluon benchmarks use AutoGluon's tabular, statistical, and optional neural models without custom Chronos-2 or TimesFM wrappers.
-
 ## Citation
 
 Citation metadata for this repository are provided in
 [`CITATION.cff`](CITATION.cff), and the corresponding Zenodo release metadata
-are provided in [`.zenodo.json`](.zenodo.json). The badge and citation metadata
-use the [concept DOI covering archived versions](https://doi.org/10.5281/zenodo.21511737).
-The currently archived release, 1.0.0, remains available at
-[doi:10.5281/zenodo.21511738](https://doi.org/10.5281/zenodo.21511738); it does not
-yet contain the changes prepared for version 1.0.1.
+are provided in [`.zenodo.json`](.zenodo.json).
 
 ## License
 
